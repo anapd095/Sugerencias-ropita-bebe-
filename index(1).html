@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Capas del bebé</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;600&display=swap">
+<style>
+:root{--bg:#E8F1F4;--panel:#FFFFFF;--ink:#17303B;--muted:#4F6D79;--line:#C9DCE3;--accent:#2F7F8F;--accent-ink:#FFFFFF;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1E25;--panel:#162A33;--ink:#E6F1F5;--muted:#9BB6C1;--line:#2A424D;--accent:#6CC1D1;--accent-ink:#0F1E25}}
+:root[data-theme="dark"]{--bg:#0F1E25;--panel:#162A33;--ink:#E6F1F5;--muted:#9BB6C1;--line:#2A424D;--accent:#6CC1D1;--accent-ink:#0F1E25}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Figtree",system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:960px;margin:0 auto;padding:28px 18px 40px}
+h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:clamp(2rem,6vw,3.2rem);line-height:1.05;margin:0 0 6px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:0 0 24px;max-width:52ch}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}
+.lbl{font-weight:600;font-size:.95rem;margin:0 0 8px;color:var(--muted)}
+.field{margin-bottom:18px}
+.field:last-child{margin-bottom:0}
+input[type=range]{width:100%;margin:4px 0 0;accent-color:var(--accent);height:32px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button,.chip,.add{font:inherit;font-weight:600;padding:9px 14px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"],.chip[aria-pressed="true"],.add{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:1.3rem;margin:0 0 10px}
+h3{font-size:1rem;margin:16px 0 6px}
+.stop-head{display:flex;gap:8px;align-items:center;margin-bottom:16px}
+.nm{flex:1;min-width:0;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.35rem;background:transparent;border:0;border-bottom:1.5px dashed var(--line);color:var(--ink);padding:4px 0;border-radius:0}
+.tm{font:inherit;background:transparent;border:1.5px solid var(--line);border-radius:10px;color:var(--ink);padding:6px 8px}
+.x{border:0;background:transparent;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:8px;border-radius:8px}
+.stop-body{display:grid;gap:18px}
+@media(min-width:700px){.stop-body{grid-template-columns:1fr 1fr}}
+.out{border-top:1px solid var(--line);padding-top:14px}
+@media(min-width:700px){.out{border-top:0;border-left:1px solid var(--line);padding:0 0 0 18px}}
+.res-head{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.rings{flex:none}
+.big{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:2.2rem;line-height:1;margin:0}
+.big-sub{color:var(--muted);margin:4px 0 0}
+ol.layers{list-style:none;margin:0;padding:0}
+ol.layers li{display:flex;gap:12px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line)}
+.dot{width:14px;height:14px;border-radius:50%;flex:none;margin-top:5px}
+.sl{margin-left:auto;flex:none;font-size:.78rem;font-weight:600;padding:1px 10px;border-radius:999px;border:1.5px solid var(--line);color:var(--muted);white-space:nowrap}
+.sl.corta{background:color-mix(in srgb,var(--accent) 20%,transparent);border-color:transparent;color:var(--ink)}
+ul.tips{margin:0;padding-left:20px}
+ul.tips li{margin-bottom:4px}
+.warn{background:color-mix(in srgb,var(--accent) 14%,transparent);border-radius:12px;padding:10px 12px;margin:12px 0 0}
+.chg{color:var(--muted);font-size:.9rem;margin:10px 0 0}
+.add{display:block;margin:4px 0 0}
+.foot{color:var(--muted);font-size:.85rem;margin-top:22px;max-width:62ch}
+a{color:var(--accent)}
+.row{display:flex;gap:8px;margin-bottom:8px}
+.q,.dt{flex:1;min-width:0;font:inherit;background:transparent;border:1.5px solid var(--line);border-radius:10px;color:var(--ink);padding:8px 10px}
+.mini{font:inherit;font-weight:600;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer}
+.picks{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.picks button{text-align:left;font:inherit;background:color-mix(in srgb,var(--accent) 12%,transparent);border:0;border-radius:10px;padding:8px 10px;color:var(--ink);cursor:pointer}
+.wx{font-size:.9rem;color:var(--muted);margin:0}
+.wx.err{font-weight:600;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Capas del bebé</h1>
+  <p class="sub">Planifica el día: añade paradas con su lugar, fecha y hora, y la app consulta la previsión para decirte qué ponerle y qué llevar en la bolsa.</p>
+
+  <section class="card" aria-live="polite">
+    <h2>Resumen del día</h2>
+    <div class="field">
+      <p class="lbl">Edad</p>
+      <div class="seg" id="age">
+        <button data-val="nb" aria-pressed="true">Menos de 3 meses</button>
+        <button data-val="old" aria-pressed="false">3 meses o más</button>
+      </div>
+    </div>
+    <div id="sum"></div>
+  </section>
+
+  <div id="stops"></div>
+  <button class="add" id="addstop">Añadir parada</button>
+
+  <p class="foot">Guía orientativa basada en la regla habitual de una capa más que un adulto. Cada bebé es distinto: comprueba siempre cómo está y consulta a tu pediatra ante cualquier duda. Datos del tiempo: <a href="https://open-meteo.com/">Open-Meteo.com</a>.</p>
+</div>
+<script>
+var BASE=[{t:'Body de algodón',sl:'larga'},{t:'Pelele o ranita',sl:'larga'},{t:'Chaqueta de punto',sl:'larga'},{t:'Forro polar o jersey grueso',sl:'larga'},{t:'Mono o abrigo acolchado',sl:'larga'},{t:'Manta o saco de paseo',sl:null}];
+function label(x){return x.t+(x.sl?' (manga '+x.sl+')':'');}
+var COLORS=['#F4C95D','#8FC9B5','#7FA9D6','#C99BD6','#F29E8E','#9FA8DA'];
+var CHECK='Toca la nuca o el pecho: si está tibio, va bien. Tener manos y pies algo fríos es normal.';
+var TR={carrito:'En el carrito',coche:'En el coche',porteo:'En el portabebés'};
+var age='nb',uid=0,stops=[];
+
+function load(){try{var j=JSON.parse(localStorage.getItem('capas-bebe-v2'));if(j&&j.stops&&j.stops.length){stops=j.stops;age=j.age||'nb';stops.forEach(function(s){if(!s.date)s.date=today();if(s.place===undefined)s.place=null;s.wx='';if(!s.mode)s.mode=s.stay==='dentro'?'dentro':'fuera';if(s.tin==null)s.tin=s.mode==='noche'?19:21;delete s.stay;});uid=stops.reduce(function(m,s){return Math.max(m,s.id);},0);return true;}}catch(e){}return false;}
+function save(){try{localStorage.setItem('capas-bebe-v2',JSON.stringify({age:age,stops:stops}));}catch(e){}}
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function newStop(prev){return {id:++uid,name:'',time:'',date:prev?prev.date:today(),place:prev?prev.place:null,wx:'',mode:'fuera',tin:21,temp:prev?prev.temp:15,tr:'carrito',sun:false,wind:false,rain:false};}
+
+function adj(e){return age==='nb'?e-2:e;}
+function outdoorEff(s,tr){var e=s.temp;if(s.wind)e-=3;if(s.sun)e+=2;if(tr==='porteo')e+=2;return adj(e);}
+function moveEff(s){
+  if(s.tr==='coche'){var e=s.temp<18?Math.min(s.temp+5,22):s.temp;if(s.sun)e+=2;return adj(e);}
+  return outdoorEff(s,s.tr);
+}
+function count(e){return e>=24?1:e>=20?2:e>=16?3:e>=10?4:e>=5?5:6;}
+function outfit(e,tr){
+  var max=tr==='coche'||tr==='casa'?4:tr==='porteo'?5:6;
+  var n=Math.min(count(e),max),L=BASE.slice(0,n);
+  L[0]=e>=28?{t:'Body ligero (o solo pañal)',sl:'corta'}:e>=24?{t:'Body con pantalón corto o fino',sl:'corta'}:e>=22?{t:'Body de algodón',sl:'corta'}:{t:'Body de algodón',sl:'larga'};
+  if(n>1)L[1]=e>=16?{t:'Pelele o ranita fina',sl:'larga'}:{t:'Pelele con pies',sl:'larga'};
+  if(tr==='porteo'&&n>=5)L[4]={t:'Cubre-portabebés o abrigo que cubra a los dos',sl:null};
+  return L;
+}
+function sleepOutfit(t){
+  if(t>=24)return [{t:'Body ligero',sl:'corta'},{t:'Saco de dormir de 0,5 TOG',sl:null}];
+  if(t>=20)return [{t:'Body de algodón',sl:'larga'},{t:'Saco de dormir de 1 TOG',sl:null}];
+  return [{t:'Body de algodón',sl:'larga'},{t:'Pijama de algodón',sl:'larga'},{t:'Saco de dormir de 2,5 TOG',sl:null}];
+}
+function calc(i){
+  var s=stops[i],acc=[],tips=[],L;
+  if(s.mode==='noche'){
+    var wn='';
+    if(s.tin>=27)wn='Hace mucho calor para dormir. Ventila o refresca la habitación y ponle solo un body fino.';
+    else if(s.tin<16)wn='La habitación está fría. Caliéntala un poco antes de acostarlo en lugar de añadir más capas.';
+    tips=['Duerme boca arriba, sin mantas, cojines ni peluches en la cuna.','Sin gorro dentro de casa.','Temperatura ideal de la habitación: entre 16 y 20 °C.'];
+    return {L:sleepOutfit(s.tin),acc:acc,tips:tips,warn:wn};
+  }
+  if(s.mode==='dentro'){
+    L=outfit(adj(s.tin),'casa');
+    var pv=i>0?stops[i-1]:null,pl=pv&&pv.mode==='fuera'?calc(i-1).L:null,pn=pl?pl.length:0;
+    if(pl&&L.length>=pn)L=pl.slice();
+    tips.push('Dentro no necesita gorro, abrigo ni manta de paseo.');
+    if(pn>L.length)tips.push('Al entrar, quítale las capas de abrigo para que no sude.');
+    tips.push('Si notas la nuca fría, añade una capa fina.');
+    return {L:L,acc:acc,tips:tips,warn:s.tin<18?'Está fresco para el bebé. Intenta mantener el interior entre 20 y 22 °C.':''};
+  }
+  L=outfit(moveEff(s),s.tr);
+  var outdoor=s.tr!=='coche',eO=outdoorEff(s,s.tr==='coche'?'carrito':s.tr);
+  if(outdoor){
+    if(s.sun&&eO>=20)acc.push('Gorro de sol y sombra');
+    if(eO<=12)acc.push('Gorro de lana');
+    if(eO<=8)acc.push('Manoplas y calcetines gruesos');
+  }
+  if(s.rain){acc.push(s.tr==='carrito'?'Cubre-cochecito o capota de lluvia':s.tr==='porteo'?'Cubre-portabebés impermeable':'Paraguas para ir del coche a la puerta');}
+  if(s.wind&&s.tr==='carrito')acc.push('Protector contra el viento para el carrito');
+  if(s.tr==='coche'&&s.sun)acc.push('Parasol para la ventanilla');
+  if(s.tr==='coche'){
+    if(s.temp<16)tips.push('En la silla del coche, sin abrigo ni mono acolchado: ponle una manta por encima.');
+    tips.push('Nunca lo dejes solo en el coche, ni un minuto.');
+  }
+  if(s.tr==='porteo'){tips.push('El calor corporal os calienta a los dos: no lo abrigues de más.');tips.push('Mantén su cara despejada y visible.');}
+  if(s.tr==='carrito')tips.push('En el carrito se mueve poco y se enfría antes: revisa su nuca de vez en cuando.');
+  if(age==='nb'&&s.sun&&outdoor)tips.push('Con menos de 6 meses, evita el sol directo.');
+  if(s.sun&&outdoor&&L[0].sl==='corta')tips.push('Con manga corta, mantén brazos y hombros a la sombra (crema solar solo a partir de los 6 meses).');
+  return {L:L,acc:acc,tips:tips,warn:''};
+}
+
+function esc(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+function ringsSvg(n,size){
+  var s='<svg class="rings" style="width:'+size+'px;height:'+size+'px" viewBox="0 0 190 190" role="img" aria-label="'+n+' capas de ropa">';
+  for(var i=n-1;i>=0;i--){s+='<circle cx="95" cy="95" r="'+(30+(i+1)*10)+'" fill="'+COLORS[i%COLORS.length]+'" stroke="var(--panel)" stroke-width="2"/>';}
+  return s+'<circle cx="95" cy="95" r="30" fill="var(--panel)"/><text x="95" y="106" text-anchor="middle" font-size="30">👶</text></svg>';
+}
+function plural(n){return n+(n===1?' capa':' capas');}
+function list(L){return '<ol class="layers">'+L.map(function(x,i){return '<li><span class="dot" style="background:'+COLORS[i%COLORS.length]+'"></span><span>'+esc(x.t)+'</span>'+(x.sl?'<span class="sl '+x.sl+'">Manga '+x.sl+'</span>':'')+'</li>';}).join('')+'</ol>';}
+
+function outHtml(i){
+  var s=stops[i],c=calc(i),n=c.L.length,h='';
+  var sub=s.mode==='noche'?'Para dormir':s.mode==='dentro'?'Dentro':TR[s.tr];
+  h+='<div class="res-head">'+ringsSvg(n,84)+'<div><p class="big">'+plural(n)+'</p><p class="big-sub">'+sub+'</p></div></div>'+list(c.L);
+  if(c.warn)h+='<p class="warn">'+esc(c.warn)+'</p>';
+  if(i>0&&s.mode!=='noche'&&stops[i-1].mode!=='noche'){
+    var p=calc(i-1).L;
+    var t=n>p.length?'añade '+c.L.slice(p.length).map(label).join(', '):n<p.length?'quita '+p.slice(n).map(label).join(', '):'';
+    if(c.L[0].sl!==p[0].sl)t+=(t?' y ':'')+'cambia el body a manga '+c.L[0].sl;
+    if(!t)t='sin cambios';
+    h+='<p class="chg">Respecto a la parada anterior: '+esc(t)+'.</p>';
+  }
+  if(c.acc.length)h+='<h3>Complementos</h3><ul class="tips">'+c.acc.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';
+  if(c.tips.length)h+='<h3>Consejos</h3><ul class="tips">'+c.tips.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';
+  return h;
+}
+function sumHtml(){
+  var ns=[],best=null,acc={},sl={},night=null;
+  stops.forEach(function(s,i){
+    var c=calc(i);
+    if(s.mode==='noche'){if(!night)night=c.L;return;}
+    ns.push(c.L.length);sl[c.L[0].sl]=1;if(!best||c.L.length>best.length)best=c.L;
+    c.acc.forEach(function(a){acc[a]=1;});
+  });
+  var h='',keys=Object.keys(acc);
+  if(best){
+    var min=Math.min.apply(null,ns),max=best.length;
+    h+='<p><b>Ropa base: '+plural(min)+'.</b> '+esc(best.slice(0,min).map(label).join(', '))+'.</p>';
+    h+=max>min?'<p><b>En la bolsa:</b> '+esc(best.slice(min).map(label).join(', '))+'.</p>':'<p>No necesitas capas de repuesto.</p>';
+    h+='<p><b>Mangas:</b> '+(sl.corta&&sl.larga?'body de manga corta o larga, según la parada.':sl.corta?'body de manga corta todo el día.':'body de manga larga todo el día.')+'</p>';
+    if(keys.length)h+='<p><b>Complementos:</b> '+esc(keys.join(', '))+'.</p>';
+  }
+  if(night)h+='<p><b>Noche:</b> '+esc(night.map(label).join(', '))+'.</p>';
+  return h+'<p class="chg">Regla de mangas: manga corta cuando la temperatura efectiva (con viento, sol y edad) llega a unos 22 °C; por debajo, manga larga. '+CHECK+'</p>';
+}
+function refreshAll(){
+  stops.forEach(function(s,i){var el=document.getElementById('out-'+s.id);if(el)el.innerHTML=outHtml(i);});
+  document.getElementById('sum').innerHTML=sumHtml();
+  save();
+}
+
+function seg(label,act,val,opts){
+  return '<div class="field"><p class="lbl">'+label+'</p><div class="seg">'+opts.map(function(o){return '<button data-act="'+act+'" data-val="'+o[0]+'" aria-pressed="'+(val===o[0])+'">'+o[1]+'</button>';}).join('')+'</div></div>';
+}
+function cardHtml(s){
+  var o=s.mode==='fuera';
+  var tl=o?'Temperatura exterior':s.mode==='dentro'?'Temperatura del interior':'Temperatura de la habitación';
+  var key=o?'temp':'tin',val=o?s.temp:s.tin,mn=o?-5:10,mx=o?40:32;
+  var place='<div class="field"><p class="lbl">Lugar y fecha</p><div class="row"><input class="q" data-f="q" placeholder="Ciudad o pueblo" aria-label="Lugar" value="'+esc(s.place?s.place.label:'')+'"><button class="mini" data-act="search">Buscar</button><button class="mini" data-act="geo" aria-label="Usar mi ubicación">📍</button></div><div class="picks" id="pk-'+s.id+'"></div><div class="row"><input class="dt" type="date" data-f="date" aria-label="Fecha" value="'+esc(s.date||'')+'"></div><p class="wx" id="wx-'+s.id+'">'+esc(s.wx||(s.place?'Lugar elegido.':'Sin lugar: ajusta la temperatura a mano.'))+'</p></div>';
+  var trans=seg('Cómo vais','tr',s.tr,[['carrito','Carrito'],['coche','Coche'],['porteo','Portabebés']]);
+  var chips='<div class="field"><p class="lbl">Tiempo</p><div class="seg">'+[['sun','Sol'],['wind','Viento'],['rain','Lluvia']].map(function(w){return '<button class="chip" data-act="w" data-val="'+w[0]+'" aria-pressed="'+s[w[0]]+'">'+w[1]+'</button>';}).join('')+'</div></div>';
+  return '<article class="card stop" data-id="'+s.id+'"><div class="stop-head">'
+  +'<input class="nm" data-f="name" placeholder="Nombre de la parada" aria-label="Nombre de la parada" value="'+esc(s.name)+'">'
+  +'<input class="tm" type="time" data-f="time" aria-label="Hora" value="'+esc(s.time)+'">'
+  +'<button class="x" data-act="del" aria-label="Quitar parada">✕</button></div>'
+  +'<div class="stop-body"><div>'
+  +seg('Dónde','mode',s.mode,[['fuera','Fuera'],['dentro','Dentro'],['noche','Noche']])
+  +(o?place:'')
+  +'<div class="field"><p class="lbl">'+tl+': <b class="tv">'+val+'</b> °C</p><input type="range" data-f="'+key+'" min="'+mn+'" max="'+mx+'" step="1" value="'+val+'" aria-label="'+tl+'"></div>'
+  +(o?trans+chips:'')
+  +'</div><div class="out" id="out-'+s.id+'"></div></div></article>';
+}
+function buildStops(){document.getElementById('stops').innerHTML=stops.map(cardHtml).join('');refreshAll();}
+function find(el){var c=el.closest('.stop');if(!c)return null;var id=+c.dataset.id;return stops.filter(function(s){return s.id===id;})[0];}
+
+var RES={},CACHE={},TIMERS={};
+function card(s){return document.querySelector('.stop[data-id="'+s.id+'"]');}
+function setWx(s,msg,err){s.wx=msg;var el=document.getElementById('wx-'+s.id);if(el){el.textContent=msg;el.className='wx'+(err?' err':'');}save();}
+function doSearch(s){
+  var c=card(s),q=c.querySelector('.q').value.trim();
+  if(q.length<2){setWx(s,'Escribe al menos dos letras del lugar.',true);return;}
+  setWx(s,'Buscando…',false);
+  fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(q)+'&count=5&language=es&format=json')
+    .then(function(r){return r.json();})
+    .then(function(j){
+      var rs=(j.results||[]).map(function(x){return {label:[x.name,x.admin1,x.country].filter(Boolean).join(', '),lat:x.latitude,lon:x.longitude};});
+      RES[s.id]=rs;
+      document.getElementById('pk-'+s.id).innerHTML=rs.map(function(x,i){return '<button data-act="pick" data-i="'+i+'">'+esc(x.label)+'</button>';}).join('');
+      setWx(s,rs.length?'Elige el lugar de la lista.':'No se encontró ese lugar. Prueba con otro nombre.',!rs.length);
+    }).catch(function(){setWx(s,'No se pudo buscar el lugar. Comprueba tu conexión.',true);});
+}
+function pick(s,i){
+  var p=(RES[s.id]||[])[i];if(!p)return;
+  s.place=p;card(s).querySelector('.q').value=p.label;document.getElementById('pk-'+s.id).innerHTML='';fetchWx(s);
+}
+function doGeo(s){
+  if(!navigator.geolocation){setWx(s,'Tu navegador no permite usar la ubicación.',true);return;}
+  setWx(s,'Obteniendo ubicación…',false);
+  navigator.geolocation.getCurrentPosition(function(p){
+    s.place={label:'Mi ubicación',lat:p.coords.latitude,lon:p.coords.longitude};
+    card(s).querySelector('.q').value='Mi ubicación';fetchWx(s);
+  },function(){setWx(s,'No se pudo obtener tu ubicación. Escribe el lugar a mano.',true);});
+}
+function setMode(s,m){
+  s.mode=m;if(m==='dentro')s.tin=21;if(m==='noche')s.tin=19;
+  card(s).outerHTML=cardHtml(s);refreshAll();
+  if(m==='fuera')fetchWx(s);
+}
+function queueWx(s){clearTimeout(TIMERS[s.id]);TIMERS[s.id]=setTimeout(function(){fetchWx(s);},500);}
+function hourly(lat,lon,date){
+  var k=lat.toFixed(2)+','+lon.toFixed(2)+','+date;
+  if(!CACHE[k]){
+    CACHE[k]=fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,wind_gusts_10m,cloud_cover,uv_index&wind_speed_unit=kmh&timezone=auto&start_date='+date+'&end_date='+date)
+      .then(function(r){return r.json();})
+      .then(function(j){if(j.error)throw new Error(j.reason||'error');return j.hourly;});
+    CACHE[k].catch(function(){delete CACHE[k];});
+  }
+  return CACHE[k];
+}
+function syncCard(s){
+  var c=card(s);if(!c)return;
+  var r=c.querySelector('input[data-f="temp"]');if(!r)return;
+  r.value=s.temp;
+  c.querySelector('.tv').textContent=s.temp;
+  c.querySelectorAll('.chip').forEach(function(x){x.setAttribute('aria-pressed',!!s[x.dataset.val]);});
+}
+function fetchWx(s){
+  if(!s.place||!s.date||s.mode!=='fuera')return;
+  var tm=s.time||'12:00',hh=parseInt(tm.slice(0,2),10),mm=parseInt(tm.slice(3,5),10)||0;
+  if(mm>=30&&hh<23)hh++;
+  var hs=String(hh).padStart(2,'0')+':00',key=s.date+'T'+hs;
+  setWx(s,'Consultando previsión…',false);
+  hourly(s.place.lat,s.place.lon,s.date).then(function(h){
+    if(s.mode!=='fuera')return;
+    var i=h.time.indexOf(key);if(i<0)throw new Error('hora');
+    var t=h.temperature_2m[i],pp=h.precipitation_probability[i]||0,pr=h.precipitation[i]||0,w=h.wind_speed_10m[i]||0,g=h.wind_gusts_10m[i]||0,cl=h.cloud_cover[i]||0,uv=h.uv_index[i]||0;
+    if(t==null)throw new Error('sin dato');
+    s.temp=Math.max(-5,Math.min(40,Math.round(t)));
+    s.rain=pp>=40||pr>=0.3;s.wind=w>=20||g>=35;s.sun=uv>=3&&cl<70;
+    syncCard(s);
+    setWx(s,'Previsión para '+s.place.label+' a las '+hs+': '+Math.round(t)+' °C, nubes '+Math.round(cl)+' %, lluvia '+Math.round(pp)+' %, viento '+Math.round(w)+' km/h.',false);
+    refreshAll();
+  }).catch(function(){setWx(s,'No hay previsión para esa fecha y hora (se ofrece hasta unos 16 días vista) o falló la conexión. Ajusta la temperatura a mano.',true);});
+}
+document.getElementById('stops').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.f==='q'){var s=find(e.target);if(s)doSearch(s);}
+});
+
+document.getElementById('stops').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-act]');if(!b)return;
+  var s=find(b);if(!s)return;
+  var a=b.dataset.act;
+  if(a==='search'){doSearch(s);return;}
+  if(a==='geo'){doGeo(s);return;}
+  if(a==='pick'){pick(s,+b.dataset.i);return;}
+  if(a==='mode'){setMode(s,b.dataset.val);return;}
+  if(a==='del'){stops=stops.filter(function(x){return x!==s;});if(!stops.length)stops.push(newStop());buildStops();return;}
+  if(a==='w'){s[b.dataset.val]=!s[b.dataset.val];b.setAttribute('aria-pressed',s[b.dataset.val]);}
+  else{s[a]=b.dataset.val;b.parentNode.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b);});}
+  refreshAll();
+});
+document.getElementById('stops').addEventListener('input',function(e){
+  var t=e.target,f=t.dataset.f;if(!f)return;
+  var s=find(t);if(!s)return;
+  if(f==='temp'){s.temp=parseInt(t.value,10);t.closest('.field').querySelector('.tv').textContent=s.temp;refreshAll();}
+  else if(f==='tin'){s.tin=parseInt(t.value,10);t.closest('.field').querySelector('.tv').textContent=s.tin;refreshAll();}
+  else if(f==='q'){return;}
+  else{s[f]=t.value;save();if(f==='date'||f==='time')queueWx(s);}
+});
+document.getElementById('age').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  age=b.dataset.val;
+  this.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b);});
+  refreshAll();
+});
+document.getElementById('addstop').addEventListener('click',function(){
+  stops.push(newStop(stops[stops.length-1]));buildStops();
+  var cards=document.querySelectorAll('.stop');cards[cards.length-1].querySelector('.nm').focus();
+});
+
+if(!load()){
+  stops=[
+    {id:++uid,name:'Paseo por el parque',time:'10:00',date:today(),place:null,wx:'',mode:'fuera',tin:21,temp:12,tr:'carrito',sun:true,wind:false,rain:false},
+    {id:++uid,name:'Comida en familia',time:'14:00',date:today(),place:null,wx:'',mode:'dentro',tin:21,temp:19,tr:'carrito',sun:false,wind:false,rain:false},
+    {id:++uid,name:'Noche en casa',time:'22:00',date:today(),place:null,wx:'',mode:'noche',tin:19,temp:12,tr:'carrito',sun:false,wind:false,rain:false}
+  ];
+}
+document.querySelectorAll('#age button').forEach(function(x){x.setAttribute('aria-pressed',x.dataset.val===age);});
+buildStops();
+stops.forEach(function(s){if(s.place&&s.date)fetchWx(s);});
+</script>
+</body>
+</html>
