@@ -90,21 +90,16 @@ var CHECK='Toca la nuca o el pecho: si está tibio, va bien. Tener manos y pies 
 var TR={carrito:'En el carrito',coche:'En el coche',porteo:'En el portabebés'};
 var age='nb',uid=0,stops=[];
 
-function load(){try{var j=JSON.parse(localStorage.getItem('capas-bebe-v2'));if(j&&j.stops&&j.stops.length){stops=j.stops;age=j.age||'nb';stops.forEach(function(s){if(!s.date)s.date=today();if(s.place===undefined)s.place=null;s.wx='';});uid=stops.reduce(function(m,s){return Math.max(m,s.id);},0);return true;}}catch(e){}return false;}
+function load(){try{var j=JSON.parse(localStorage.getItem('capas-bebe-v2'));if(j&&j.stops&&j.stops.length){stops=j.stops;age=j.age||'nb';stops.forEach(function(s){if(!s.date)s.date=today();if(s.place===undefined)s.place=null;s.wx='';if(!s.mode)s.mode=s.stay==='dentro'?'dentro':'fuera';if(s.tin==null)s.tin=s.mode==='noche'?19:21;delete s.stay;});uid=stops.reduce(function(m,s){return Math.max(m,s.id);},0);return true;}}catch(e){}return false;}
 function save(){try{localStorage.setItem('capas-bebe-v2',JSON.stringify({age:age,stops:stops}));}catch(e){}}
 function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function newStop(prev){return {id:++uid,name:'',time:'',date:prev?prev.date:today(),place:prev?prev.place:null,wx:'',temp:prev?prev.temp:15,tr:'carrito',stay:'fuera',sun:false,wind:false,rain:false};}
+function newStop(prev){return {id:++uid,name:'',time:'',date:prev?prev.date:today(),place:prev?prev.place:null,wx:'',mode:'fuera',tin:21,temp:prev?prev.temp:15,tr:'carrito',sun:false,wind:false,rain:false};}
 
 function adj(e){return age==='nb'?e-2:e;}
 function outdoorEff(s,tr){var e=s.temp;if(s.wind)e-=3;if(s.sun)e+=2;if(tr==='porteo')e+=2;return adj(e);}
 function moveEff(s){
   if(s.tr==='coche'){var e=s.temp<18?Math.min(s.temp+5,22):s.temp;if(s.sun)e+=2;return adj(e);}
   return outdoorEff(s,s.tr);
-}
-function stayCtx(s){
-  if(s.stay==='dentro')return {e:adj(21),tr:'casa'};
-  var tr=s.tr==='coche'?'carrito':s.tr;
-  return {e:outdoorEff(s,tr),tr:tr};
 }
 function count(e){return e>=24?1:e>=20?2:e>=16?3:e>=10?4:e>=5?5:6;}
 function outfit(e,tr){
@@ -115,11 +110,31 @@ function outfit(e,tr){
   if(tr==='porteo'&&n>=5)L[4]={t:'Cubre-portabebés o abrigo que cubra a los dos',sl:null};
   return L;
 }
-function calc(s){
-  var mv=outfit(moveEff(s),s.tr),sc=stayCtx(s),st=outfit(sc.e,sc.tr);
-  var eO=outdoorEff(s,s.tr==='coche'?'carrito':s.tr);
-  var outdoor=s.tr!=='coche'||s.stay==='fuera';
-  var acc=[],tips=[];
+function sleepOutfit(t){
+  if(t>=24)return [{t:'Body ligero',sl:'corta'},{t:'Saco de dormir de 0,5 TOG',sl:null}];
+  if(t>=20)return [{t:'Body de algodón',sl:'larga'},{t:'Saco de dormir de 1 TOG',sl:null}];
+  return [{t:'Body de algodón',sl:'larga'},{t:'Pijama de algodón',sl:'larga'},{t:'Saco de dormir de 2,5 TOG',sl:null}];
+}
+function calc(i){
+  var s=stops[i],acc=[],tips=[],L;
+  if(s.mode==='noche'){
+    var wn='';
+    if(s.tin>=27)wn='Hace mucho calor para dormir. Ventila o refresca la habitación y ponle solo un body fino.';
+    else if(s.tin<16)wn='La habitación está fría. Caliéntala un poco antes de acostarlo en lugar de añadir más capas.';
+    tips=['Duerme boca arriba, sin mantas, cojines ni peluches en la cuna.','Sin gorro dentro de casa.','Temperatura ideal de la habitación: entre 16 y 20 °C.'];
+    return {L:sleepOutfit(s.tin),acc:acc,tips:tips,warn:wn};
+  }
+  if(s.mode==='dentro'){
+    L=outfit(adj(s.tin),'casa');
+    var pv=i>0?stops[i-1]:null,pl=pv&&pv.mode==='fuera'?calc(i-1).L:null,pn=pl?pl.length:0;
+    if(pl&&L.length>=pn)L=pl.slice();
+    tips.push('Dentro no necesita gorro, abrigo ni manta de paseo.');
+    if(pn>L.length)tips.push('Al entrar, quítale las capas de abrigo para que no sude.');
+    tips.push('Si notas la nuca fría, añade una capa fina.');
+    return {L:L,acc:acc,tips:tips,warn:s.tin<18?'Está fresco para el bebé. Intenta mantener el interior entre 20 y 22 °C.':''};
+  }
+  L=outfit(moveEff(s),s.tr);
+  var outdoor=s.tr!=='coche',eO=outdoorEff(s,s.tr==='coche'?'carrito':s.tr);
   if(outdoor){
     if(s.sun&&eO>=20)acc.push('Gorro de sol y sombra');
     if(eO<=12)acc.push('Gorro de lana');
@@ -134,10 +149,9 @@ function calc(s){
   }
   if(s.tr==='porteo'){tips.push('El calor corporal os calienta a los dos: no lo abrigues de más.');tips.push('Mantén su cara despejada y visible.');}
   if(s.tr==='carrito')tips.push('En el carrito se mueve poco y se enfría antes: revisa su nuca de vez en cuando.');
-  if(s.stay==='dentro')tips.push('Al entrar, quítale las capas de abrigo para que no sude.');
   if(age==='nb'&&s.sun&&outdoor)tips.push('Con menos de 6 meses, evita el sol directo.');
-  if(s.sun&&outdoor&&mv[0].sl==='corta')tips.push('Con manga corta, mantén brazos y hombros a la sombra (crema solar solo a partir de los 6 meses).');
-  return {mv:mv,st:st,acc:acc,tips:tips};
+  if(s.sun&&outdoor&&L[0].sl==='corta')tips.push('Con manga corta, mantén brazos y hombros a la sombra (crema solar solo a partir de los 6 meses).');
+  return {L:L,acc:acc,tips:tips,warn:''};
 }
 
 function esc(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
@@ -150,19 +164,14 @@ function plural(n){return n+(n===1?' capa':' capas');}
 function list(L){return '<ol class="layers">'+L.map(function(x,i){return '<li><span class="dot" style="background:'+COLORS[i%COLORS.length]+'"></span><span>'+esc(x.t)+'</span>'+(x.sl?'<span class="sl '+x.sl+'">Manga '+x.sl+'</span>':'')+'</li>';}).join('')+'</ol>';}
 
 function outHtml(i){
-  var s=stops[i],c=calc(s),n=c.mv.length,m=c.st.length,h='';
-  h+='<div class="res-head">'+ringsSvg(n,84)+'<div><p class="big">'+plural(n)+'</p><p class="big-sub">'+TR[s.tr]+'</p></div></div>'+list(c.mv);
-  var sleeveChg=c.mv[0].sl!==c.st[0].sl;
-  if(m!==n||sleeveChg){
-    var where=s.stay==='dentro'?'Al llegar dentro':'Una vez allí';
-    var d=m<n?'Quita: '+c.mv.slice(m).map(label).join(', '):m>n?'Añade: '+c.st.slice(n).map(label).join(', '):'';
-    if(sleeveChg)d+=(d?'. ':'')+'Cambia el body a manga '+c.st[0].sl;
-    h+='<p class="warn"><b>'+where+': '+plural(m)+'.</b> '+esc(d)+'.</p>';
-  }
-  if(i>0){
-    var p=calc(stops[i-1]).st,k=c.mv.length;
-    var t=k>p.length?'añade '+c.mv.slice(p.length).map(label).join(', '):k<p.length?'quita '+p.slice(k).map(label).join(', '):'';
-    if(c.mv[0].sl!==p[0].sl)t+=(t?' y ':'')+'cambia el body a manga '+c.mv[0].sl;
+  var s=stops[i],c=calc(i),n=c.L.length,h='';
+  var sub=s.mode==='noche'?'Para dormir':s.mode==='dentro'?'Dentro':TR[s.tr];
+  h+='<div class="res-head">'+ringsSvg(n,84)+'<div><p class="big">'+plural(n)+'</p><p class="big-sub">'+sub+'</p></div></div>'+list(c.L);
+  if(c.warn)h+='<p class="warn">'+esc(c.warn)+'</p>';
+  if(i>0&&s.mode!=='noche'&&stops[i-1].mode!=='noche'){
+    var p=calc(i-1).L;
+    var t=n>p.length?'añade '+c.L.slice(p.length).map(label).join(', '):n<p.length?'quita '+p.slice(n).map(label).join(', '):'';
+    if(c.L[0].sl!==p[0].sl)t+=(t?' y ':'')+'cambia el body a manga '+c.L[0].sl;
     if(!t)t='sin cambios';
     h+='<p class="chg">Respecto a la parada anterior: '+esc(t)+'.</p>';
   }
@@ -171,13 +180,22 @@ function outHtml(i){
   return h;
 }
 function sumHtml(){
-  var ns=[],best=null,acc={},sl={};
-  stops.forEach(function(s){var c=calc(s);[c.mv,c.st].forEach(function(L){ns.push(L.length);sl[L[0].sl]=1;if(!best||L.length>best.length)best=L;});c.acc.forEach(function(a){acc[a]=1;});});
-  var min=Math.min.apply(null,ns),max=best.length,keys=Object.keys(acc);
-  var h='<p><b>Ropa base: '+plural(min)+'.</b> '+esc(best.slice(0,min).map(label).join(', '))+'.</p>';
-  h+=max>min?'<p><b>En la bolsa:</b> '+esc(best.slice(min).map(label).join(', '))+'.</p>':'<p>No necesitas capas de repuesto.</p>';
-  h+='<p><b>Mangas:</b> '+(sl.corta&&sl.larga?'body de manga corta o larga, según la parada.':sl.corta?'body de manga corta todo el día.':'body de manga larga todo el día.')+'</p>';
-  if(keys.length)h+='<p><b>Complementos:</b> '+esc(keys.join(', '))+'.</p>';
+  var ns=[],best=null,acc={},sl={},night=null;
+  stops.forEach(function(s,i){
+    var c=calc(i);
+    if(s.mode==='noche'){if(!night)night=c.L;return;}
+    ns.push(c.L.length);sl[c.L[0].sl]=1;if(!best||c.L.length>best.length)best=c.L;
+    c.acc.forEach(function(a){acc[a]=1;});
+  });
+  var h='',keys=Object.keys(acc);
+  if(best){
+    var min=Math.min.apply(null,ns),max=best.length;
+    h+='<p><b>Ropa base: '+plural(min)+'.</b> '+esc(best.slice(0,min).map(label).join(', '))+'.</p>';
+    h+=max>min?'<p><b>En la bolsa:</b> '+esc(best.slice(min).map(label).join(', '))+'.</p>':'<p>No necesitas capas de repuesto.</p>';
+    h+='<p><b>Mangas:</b> '+(sl.corta&&sl.larga?'body de manga corta o larga, según la parada.':sl.corta?'body de manga corta todo el día.':'body de manga larga todo el día.')+'</p>';
+    if(keys.length)h+='<p><b>Complementos:</b> '+esc(keys.join(', '))+'.</p>';
+  }
+  if(night)h+='<p><b>Noche:</b> '+esc(night.map(label).join(', '))+'.</p>';
   return h+'<p class="chg">Regla de mangas: manga corta cuando la temperatura efectiva (con viento, sol y edad) llega a unos 22 °C; por debajo, manga larga. '+CHECK+'</p>';
 }
 function refreshAll(){
@@ -190,18 +208,22 @@ function seg(label,act,val,opts){
   return '<div class="field"><p class="lbl">'+label+'</p><div class="seg">'+opts.map(function(o){return '<button data-act="'+act+'" data-val="'+o[0]+'" aria-pressed="'+(val===o[0])+'">'+o[1]+'</button>';}).join('')+'</div></div>';
 }
 function cardHtml(s){
+  var o=s.mode==='fuera';
+  var tl=o?'Temperatura exterior':s.mode==='dentro'?'Temperatura del interior':'Temperatura de la habitación';
+  var key=o?'temp':'tin',val=o?s.temp:s.tin,mn=o?-5:10,mx=o?40:32;
+  var place='<div class="field"><p class="lbl">Lugar y fecha</p><div class="row"><input class="q" data-f="q" placeholder="Ciudad o pueblo" aria-label="Lugar" value="'+esc(s.place?s.place.label:'')+'"><button class="mini" data-act="search">Buscar</button><button class="mini" data-act="geo" aria-label="Usar mi ubicación">📍</button></div><div class="picks" id="pk-'+s.id+'"></div><div class="row"><input class="dt" type="date" data-f="date" aria-label="Fecha" value="'+esc(s.date||'')+'"></div><p class="wx" id="wx-'+s.id+'">'+esc(s.wx||(s.place?'Lugar elegido.':'Sin lugar: ajusta la temperatura a mano.'))+'</p></div>';
+  var trans=seg('Cómo vais','tr',s.tr,[['carrito','Carrito'],['coche','Coche'],['porteo','Portabebés']]);
+  var chips='<div class="field"><p class="lbl">Tiempo</p><div class="seg">'+[['sun','Sol'],['wind','Viento'],['rain','Lluvia']].map(function(w){return '<button class="chip" data-act="w" data-val="'+w[0]+'" aria-pressed="'+s[w[0]]+'">'+w[1]+'</button>';}).join('')+'</div></div>';
   return '<article class="card stop" data-id="'+s.id+'"><div class="stop-head">'
   +'<input class="nm" data-f="name" placeholder="Nombre de la parada" aria-label="Nombre de la parada" value="'+esc(s.name)+'">'
   +'<input class="tm" type="time" data-f="time" aria-label="Hora" value="'+esc(s.time)+'">'
   +'<button class="x" data-act="del" aria-label="Quitar parada">✕</button></div>'
   +'<div class="stop-body"><div>'
-  +'<div class="field"><p class="lbl">Lugar y fecha</p><div class="row"><input class="q" data-f="q" placeholder="Ciudad o pueblo" aria-label="Lugar" value="'+esc(s.place?s.place.label:'')+'"><button class="mini" data-act="search">Buscar</button><button class="mini" data-act="geo" aria-label="Usar mi ubicación">📍</button></div><div class="picks" id="pk-'+s.id+'"></div><div class="row"><input class="dt" type="date" data-f="date" aria-label="Fecha" value="'+esc(s.date||'')+'"></div><p class="wx" id="wx-'+s.id+'">'+esc(s.wx||(s.place?'Lugar elegido.':'Sin lugar: ajusta la temperatura a mano.'))+'</p></div>'
-  +'<div class="field"><p class="lbl">Temperatura exterior: <b class="tv">'+s.temp+'</b> °C</p><input type="range" data-f="temp" min="-5" max="40" step="1" value="'+s.temp+'" aria-label="Temperatura exterior"></div>'
-  +seg('Cómo vais','tr',s.tr,[['carrito','Carrito'],['coche','Coche'],['porteo','Portabebés']])
-  +seg('Dónde estáis','stay',s.stay,[['fuera','Fuera'],['dentro','Dentro']])
-  +'<div class="field"><p class="lbl">Tiempo</p><div class="seg">'
-  +[['sun','Sol'],['wind','Viento'],['rain','Lluvia']].map(function(w){return '<button class="chip" data-act="w" data-val="'+w[0]+'" aria-pressed="'+s[w[0]]+'">'+w[1]+'</button>';}).join('')
-  +'</div></div></div><div class="out" id="out-'+s.id+'"></div></div></article>';
+  +seg('Dónde','mode',s.mode,[['fuera','Fuera'],['dentro','Dentro'],['noche','Noche']])
+  +(o?place:'')
+  +'<div class="field"><p class="lbl">'+tl+': <b class="tv">'+val+'</b> °C</p><input type="range" data-f="'+key+'" min="'+mn+'" max="'+mx+'" step="1" value="'+val+'" aria-label="'+tl+'"></div>'
+  +(o?trans+chips:'')
+  +'</div><div class="out" id="out-'+s.id+'"></div></div></article>';
 }
 function buildStops(){document.getElementById('stops').innerHTML=stops.map(cardHtml).join('');refreshAll();}
 function find(el){var c=el.closest('.stop');if(!c)return null;var id=+c.dataset.id;return stops.filter(function(s){return s.id===id;})[0];}
@@ -234,6 +256,11 @@ function doGeo(s){
     card(s).querySelector('.q').value='Mi ubicación';fetchWx(s);
   },function(){setWx(s,'No se pudo obtener tu ubicación. Escribe el lugar a mano.',true);});
 }
+function setMode(s,m){
+  s.mode=m;if(m==='dentro')s.tin=21;if(m==='noche')s.tin=19;
+  card(s).outerHTML=cardHtml(s);refreshAll();
+  if(m==='fuera')fetchWx(s);
+}
 function queueWx(s){clearTimeout(TIMERS[s.id]);TIMERS[s.id]=setTimeout(function(){fetchWx(s);},500);}
 function hourly(lat,lon,date){
   var k=lat.toFixed(2)+','+lon.toFixed(2)+','+date;
@@ -247,17 +274,19 @@ function hourly(lat,lon,date){
 }
 function syncCard(s){
   var c=card(s);if(!c)return;
-  c.querySelector('input[data-f="temp"]').value=s.temp;
+  var r=c.querySelector('input[data-f="temp"]');if(!r)return;
+  r.value=s.temp;
   c.querySelector('.tv').textContent=s.temp;
   c.querySelectorAll('.chip').forEach(function(x){x.setAttribute('aria-pressed',!!s[x.dataset.val]);});
 }
 function fetchWx(s){
-  if(!s.place||!s.date)return;
+  if(!s.place||!s.date||s.mode!=='fuera')return;
   var tm=s.time||'12:00',hh=parseInt(tm.slice(0,2),10),mm=parseInt(tm.slice(3,5),10)||0;
   if(mm>=30&&hh<23)hh++;
   var hs=String(hh).padStart(2,'0')+':00',key=s.date+'T'+hs;
   setWx(s,'Consultando previsión…',false);
   hourly(s.place.lat,s.place.lon,s.date).then(function(h){
+    if(s.mode!=='fuera')return;
     var i=h.time.indexOf(key);if(i<0)throw new Error('hora');
     var t=h.temperature_2m[i],pp=h.precipitation_probability[i]||0,pr=h.precipitation[i]||0,w=h.wind_speed_10m[i]||0,g=h.wind_gusts_10m[i]||0,cl=h.cloud_cover[i]||0,uv=h.uv_index[i]||0;
     if(t==null)throw new Error('sin dato');
@@ -279,6 +308,7 @@ document.getElementById('stops').addEventListener('click',function(e){
   if(a==='search'){doSearch(s);return;}
   if(a==='geo'){doGeo(s);return;}
   if(a==='pick'){pick(s,+b.dataset.i);return;}
+  if(a==='mode'){setMode(s,b.dataset.val);return;}
   if(a==='del'){stops=stops.filter(function(x){return x!==s;});if(!stops.length)stops.push(newStop());buildStops();return;}
   if(a==='w'){s[b.dataset.val]=!s[b.dataset.val];b.setAttribute('aria-pressed',s[b.dataset.val]);}
   else{s[a]=b.dataset.val;b.parentNode.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b);});}
@@ -288,6 +318,7 @@ document.getElementById('stops').addEventListener('input',function(e){
   var t=e.target,f=t.dataset.f;if(!f)return;
   var s=find(t);if(!s)return;
   if(f==='temp'){s.temp=parseInt(t.value,10);t.closest('.field').querySelector('.tv').textContent=s.temp;refreshAll();}
+  else if(f==='tin'){s.tin=parseInt(t.value,10);t.closest('.field').querySelector('.tv').textContent=s.tin;refreshAll();}
   else if(f==='q'){return;}
   else{s[f]=t.value;save();if(f==='date'||f==='time')queueWx(s);}
 });
@@ -304,8 +335,9 @@ document.getElementById('addstop').addEventListener('click',function(){
 
 if(!load()){
   stops=[
-    {id:++uid,name:'Paseo por el parque',time:'10:00',date:today(),place:null,wx:'',temp:12,tr:'carrito',stay:'fuera',sun:true,wind:false,rain:false},
-    {id:++uid,name:'Comida en familia',time:'14:00',date:today(),place:null,wx:'',temp:19,tr:'coche',stay:'dentro',sun:false,wind:false,rain:false}
+    {id:++uid,name:'Paseo por el parque',time:'10:00',date:today(),place:null,wx:'',mode:'fuera',tin:21,temp:12,tr:'carrito',sun:true,wind:false,rain:false},
+    {id:++uid,name:'Comida en familia',time:'14:00',date:today(),place:null,wx:'',mode:'dentro',tin:21,temp:19,tr:'carrito',sun:false,wind:false,rain:false},
+    {id:++uid,name:'Noche en casa',time:'22:00',date:today(),place:null,wx:'',mode:'noche',tin:19,temp:12,tr:'carrito',sun:false,wind:false,rain:false}
   ];
 }
 document.querySelectorAll('#age button').forEach(function(x){x.setAttribute('aria-pressed',x.dataset.val===age);});
